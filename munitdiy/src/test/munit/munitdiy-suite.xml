@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="munitdiy-suite.xml" />
+	<munit:test name="SelectFromFile-test" doc:id="76443305-0855-4562-89b3-2ce9d11252ba" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock ReadFromWebApp" doc:id="19ca74b5-e3df-4691-9dfd-65c190352c1a" processor="file:read">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="18851fdd-b909-4320-a6cb-8abb509199fe" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output text/csv  --- readUrl('classpath://SelectFromFiletest\mock_payload2.dwl')]" mediaType="text/csv " encoding="UTF-8" />
+					<munit-tools:attributes value="#[readUrl('classpath://SelectFromFiletest\mock_attributes2.dwl')]" />
+					<munit-tools:variables >
+						<munit-tools:variable key="DatabaseProducts" value="#[output application/json --- readUrl('classpath://SelectFromFiletest\mock_variable_2.dwl')]" mediaType="application/json" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:spy doc:name="Spy WebAppProducts" doc:id="34790797-0873-4cb6-8e4a-e8661cfae110" processor="set-variable">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="c98001e6-fd07-478f-bd11-30766cb44c0a" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:before-call >
+					<munit-tools:assert doc:name="Assert payload" doc:id="125e64b4-37b8-444f-bf21-5c10a34a16fd" message="The payload does not match">
+						<munit-tools:that ><![CDATA[#[%dw 2.0
+import SelectFromFiletest::spy_assert_payload4
+---
+spy_assert_payload4::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+					</munit-tools:assert>
+				</munit-tools:before-call>
+				<munit-tools:after-call >
+					<munit-tools:assert doc:name="Assert payload" doc:id="c82fbaa3-6eee-4833-8faf-4fff06a973ce" message="The payload does not match">
+						<munit-tools:that ><![CDATA[#[%dw 2.0
+import SelectFromFiletest::spy_assert_payload5
+---
+spy_assert_payload5::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+					</munit-tools:assert>
+				</munit-tools:after-call>
+			</munit-tools:spy>
+			<munit:set-event doc:name="Set Input" doc:id="e5f6dd2c-a706-4df1-a029-e511b2e5f26f" >
+				<munit:payload value="#[output application/json  --- readUrl('classpath://SelectFromFiletest\set-event_payload2.dwl')]" encoding="UTF-8" mediaType="application/json " />
+				<munit:variables >
+					<munit:variable key="DatabaseProducts" value="#[output application/json --- readUrl('classpath://SelectFromFiletest\set-event_variable_2.dwl')]" encoding="UTF-8" mediaType="application/json" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to SelectFromFile" doc:id="7eb9347f-ce5f-4009-9a60-e7f3457bc74b" name="SelectFromFile"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="cb8a497f-a4e3-4a0b-8503-225f18df3196" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import SelectFromFiletest::assert_expression_payload2
+---
+assert_expression_payload2::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+			<munit-tools:verify-call doc:name="Verify Transform Message" doc:id="0627499b-d14d-4ba6-9d5c-a9666f1206bc" processor="ee:transform" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="449e3d0d-984e-46c5-86c7-967779c0fc19" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify WebAppProducts" doc:id="67abdadd-e63d-47fe-bb6a-c3a6728826a5" processor="set-variable" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="c98001e6-fd07-478f-bd11-30766cb44c0a" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="SelectFromBase-test" doc:id="d050b2fb-d4f0-471a-895c-8cc17f3afab7" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Select Products" doc:id="1b2f18aa-8cc1-4ba0-957c-34bfb1cdba3f" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="1816fa3e-09b2-45ae-a5dd-2714e2a5da8b" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/java  --- readUrl('classpath://SelectFromBasetest\mock_payload1.dwl')]" mediaType="application/java " encoding="UTF-8" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:spy doc:name="Spy DatabaseProducts" doc:id="7ec69cd3-f9f8-4ca6-b369-edbb3ffe8117" processor="set-variable">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="e31daba1-ded1-4c81-a05f-99c2b380062a" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:before-call >
+					<munit-tools:assert doc:name="Assert payload" doc:id="986bca44-8bc0-4512-8d81-2eef82f2f86b" message="The payload does not match">
+						<munit-tools:that ><![CDATA[#[%dw 2.0
+import SelectFromBasetest::spy_assert_payload2
+---
+spy_assert_payload2::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+					</munit-tools:assert>
+				</munit-tools:before-call>
+				<munit-tools:after-call >
+					<munit-tools:assert doc:name="Assert payload" doc:id="affb9a2b-d2c4-480f-ae12-528f39aff34d" message="The payload does not match">
+						<munit-tools:that ><![CDATA[#[%dw 2.0
+import SelectFromBasetest::spy_assert_payload3
+---
+spy_assert_payload3::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+					</munit-tools:assert>
+				</munit-tools:after-call>
+			</munit-tools:spy>
+			<munit:set-event doc:name="Set Input" doc:id="3e831ebf-be3a-419d-af72-014d313e63af" >
+				<munit:payload value="#[readUrl('classpath://SelectFromBasetest\set-event_payload1.dwl')]" encoding="UTF-8" />
+				<munit:attributes value="#[readUrl('classpath://SelectFromBasetest\set-event_attributes1.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to SelectFromBase" doc:id="af6349b0-1f8b-437e-bfea-4ae5c266da99" name="SelectFromBase"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="529c6933-57de-4ee1-b88a-b81d0851cd46" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import SelectFromBasetest::assert_expression_payload1
+---
+assert_expression_payload1::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+			<munit-tools:verify-call doc:name="Verify ToJSON" doc:id="1d340d01-0942-4257-9ae6-8bbe000febaf" processor="ee:transform" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="4a6604ba-95f9-4eed-af48-fea3373c4a7a" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify DatabaseProducts" doc:id="26fc14aa-893c-413d-9a88-82ec1d6f9245" processor="set-variable" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="e31daba1-ded1-4c81-a05f-99c2b380062a" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="munitdiyFlow-test" doc:id="97c3ec9f-4890-45aa-83af-e404254ac263" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock GetProductFromFile" doc:id="f6a45407-3008-4121-b4c5-b0a9fe2dd6f4" processor="flow-ref">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="9b15d563-cc22-4fc5-9ed0-3454782e8f27" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json  --- readUrl('classpath://munitdiyFlowtest\mock_payload2.dwl')]" mediaType="application/json " encoding="UTF-8" />
+					<munit-tools:attributes value="#[readUrl('classpath://munitdiyFlowtest\mock_attributes1.dwl')]" />
+					<munit-tools:variables >
+						<munit-tools:variable key="WebAppProducts" value="#[output application/json --- readUrl('classpath://munitdiyFlowtest\mock_variable_3.dwl')]" mediaType="application/json" encoding="UTF-8" />
+						<munit-tools:variable key="DatabaseProducts" value="#[output application/json --- readUrl('classpath://munitdiyFlowtest\mock_variable_4.dwl')]" mediaType="application/json" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock GetProductsFromBase" doc:id="e61fee54-917d-465b-81b0-d07050585826" processor="flow-ref">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="4acdda02-bd30-4cad-84f0-7e07ead2fa76" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json  --- readUrl('classpath://munitdiyFlowtest\mock_payload3.dwl')]" mediaType="application/json " encoding="UTF-8" />
+					<munit-tools:variables >
+						<munit-tools:variable key="DatabaseProducts" value="#[output application/json --- readUrl('classpath://munitdiyFlowtest\mock_variable_5.dwl')]" mediaType="application/json" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:spy doc:name="Spy Set Payload" doc:id="882d4e5a-813f-4054-803a-67012d1f6d1b" processor="set-payload">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="28cdf3ac-4d78-400f-965f-55a1fbee7f4f" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:before-call >
+					<munit-tools:assert doc:name="Assert payload" doc:id="e8b77329-4a99-44ec-839c-98c3ba447e15" message="The payload does not match">
+						<munit-tools:that ><![CDATA[#[%dw 2.0
+import munitdiyFlowtest::spy_assert_payload
+---
+spy_assert_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+					</munit-tools:assert>
+				</munit-tools:before-call>
+				<munit-tools:after-call >
+					<munit-tools:assert doc:name="Assert payload" doc:id="1228fab9-3202-4bee-84af-2e99fbaeeaea" message="The payload does not match">
+						<munit-tools:that ><![CDATA[#[%dw 2.0
+import munitdiyFlowtest::spy_assert_payload1
+---
+spy_assert_payload1::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+					</munit-tools:assert>
+				</munit-tools:after-call>
+			</munit-tools:spy>
+			<munit:set-event doc:name="Set Input" doc:id="a3e413e4-6587-4b79-85e9-14c768849d84" >
+				<munit:payload value="#[readUrl('classpath://munitdiyFlowtest\set-event_payload1.dwl')]" encoding="UTF-8" />
+				<munit:attributes value="#[readUrl('classpath://munitdiyFlowtest\set-event_attributes1.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to munitdiyFlow" doc:id="d5caaa56-66f9-4e14-9e07-219fae64b538" name="munitdiyFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="85c8ab9c-660c-45d4-a1ec-31c4f0137b29" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import munitdiyFlowtest::assert_expression_payload1
+---
+assert_expression_payload1::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+			<munit-tools:verify-call doc:name="Verify Set Payload" doc:id="2f3e5c14-4f21-4867-a290-2bad2719e48f" processor="set-payload" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="28cdf3ac-4d78-400f-965f-55a1fbee7f4f" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="munitdiyFlow-test1" doc:id="d81c59bf-be9b-4daf-8b92-0050d9607038" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock GetProductFromFile" doc:id="b3691fc2-4b57-4780-85b0-67ec1943ea42" processor="flow-ref">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="9b15d563-cc22-4fc5-9ed0-3454782e8f27" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json  --- readUrl('classpath://munitdiyFlowtest1\mock_payload.dwl')]" mediaType="application/json " encoding="UTF-8" />
+					<munit-tools:attributes value="#[readUrl('classpath://munitdiyFlowtest1\mock_attributes.dwl')]" />
+					<munit-tools:variables >
+						<munit-tools:variable key="WebAppProducts" value="#[output application/json --- readUrl('classpath://munitdiyFlowtest1\mock_variable_.dwl')]" mediaType="application/json" encoding="UTF-8" />
+						<munit-tools:variable key="DatabaseProducts" value="#[output application/json --- readUrl('classpath://munitdiyFlowtest1\mock_variable_1.dwl')]" mediaType="application/json" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock GetProductsFromBase" doc:id="1c688921-6806-4f53-973b-9f46ca03cccf" processor="flow-ref">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="4acdda02-bd30-4cad-84f0-7e07ead2fa76" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json  --- readUrl('classpath://munitdiyFlowtest1\mock_payload1.dwl')]" mediaType="application/json " encoding="UTF-8" />
+					<munit-tools:variables >
+						<munit-tools:variable key="DatabaseProducts" value="#[output application/json --- readUrl('classpath://munitdiyFlowtest1\mock_variable_2.dwl')]" mediaType="application/json" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="1c54ffc7-5986-43c7-a022-73566b9be976" >
+				<munit:payload value="#[readUrl('classpath://munitdiyFlowtest1\set-event_payload1.dwl')]" encoding="UTF-8" />
+				<munit:attributes value="#[readUrl('classpath://munitdiyFlowtest1\set-event_attributes1.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to munitdiyFlow" doc:id="13ea78ad-b506-4353-8757-0c3d8acb9aff" name="munitdiyFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="ffcffea6-6378-4a0a-a1cb-6ecdebc6a74d" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import munitdiyFlowtest1::assert_expression_payload1
+---
+assert_expression_payload1::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+			<munit-tools:verify-call doc:name="Verify Logger" doc:id="77f9a337-c225-4c8a-818f-2cbfb4acc549" processor="logger" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="2cdc7932-c055-4eb6-93e4-1658e6d14aea" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:email="http://www.mulesoft.org/schema/mule/email" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="02f0798d-c592-42b3-8731-0f05da48ca67" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="87fcfd9f-7126-4149-9840-d369df76becb" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="mili" database="productsschema"/>
+	</db:config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="5c393e55-4d5b-4232-9008-7ae0f47a3a14" >
+		<file:connection workingDir="C:\Users\mbovan\Desktop\Files" />
+	</file:config>
+	<email:smtp-config name="Email_SMTP" doc:name="Email SMTP" doc:id="d3f8abde-56ef-47ca-9b50-19ba71b3aaf7" >
+		<email:smtp-connection host="stmp.gmail.com" port="587" user="covid23serbia@gmail.com" password="covidcovid" >
+			<email:properties >
+				<email:property key="mail.smtp.starttls.enable" value="true" />
+				<email:property key="mail.smtp.ssl.trust" value="smtp.gmail.com" />
+			</email:properties>
+		</email:smtp-connection>
+	</email:smtp-config>
+	<sub-flow name="SelectFromFile" doc:id="31395b6a-771a-4b24-86f0-7154d7ea62ff" >
+		<file:read doc:name="ReadFromWebApp" doc:id="18851fdd-b909-4320-a6cb-8abb509199fe" config-ref="File_Config" path="products.csv" />
+		<ee:transform doc:name="Transform Message" doc:id="449e3d0d-984e-46c5-86c7-967779c0fc19">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	Code: payload01.Code,
+	Name: payload01.Name,
+	Quantity: payload01.Quantity,
+	Description: payload01.Description
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[payload]" doc:name="WebAppProducts" doc:id="c98001e6-fd07-478f-bd11-30766cb44c0a" variableName="WebAppProducts" />
+	</sub-flow>
+	<sub-flow name="SelectFromBase" doc:id="10c19ac1-d7b6-4a7d-b741-6634507f793b" >
+		<db:select doc:name="Select Products" doc:id="1816fa3e-09b2-45ae-a5dd-2714e2a5da8b" config-ref="Database_Config">
+			<db:sql><![CDATA[select * from products]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="ToJSON" doc:id="4a6604ba-95f9-4eed-af48-fea3373c4a7a">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	Code: payload01.code,
+	Name: payload01.name,
+	Quantity: payload01.quantity,
+	Description: payload01.description default ""
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[payload]" doc:name="DatabaseProducts" doc:id="e31daba1-ded1-4c81-a05f-99c2b380062a" variableName="DatabaseProducts" />
+	</sub-flow>
+	<flow name="munitdiyFlow" doc:id="7da68876-a491-42d8-8853-536b5d6fd6f1" >
+		<http:listener doc:name="getProducts" doc:id="51506d14-0b0e-4322-9cf2-9e591f987050" config-ref="HTTP_Listener_config" path="/products"/>
+		<flow-ref doc:name="GetProductsFromBase" doc:id="4acdda02-bd30-4cad-84f0-7e07ead2fa76" name="SelectFromBase" />
+		<flow-ref doc:name="GetProductFromFile" doc:id="9b15d563-cc22-4fc5-9ed0-3454782e8f27" name="SelectFromFile" />
+		<choice doc:name="isSameLengthOfArrays" doc:id="9d9ffb52-081b-4bee-a8dd-c41849695a5f" >
+			<when expression="#[sizeOf(vars.DatabaseProducts) != sizeOf(vars.WebAppProducts)]">
+				<set-payload value="#[%dw 2.0&#10;output application/json&#10;---&#10;vars.WebAppProducts -- vars.DatabaseProducts]" doc:name="Set Payload" doc:id="28cdf3ac-4d78-400f-965f-55a1fbee7f4f" />
+				<parse-template doc:name="Parse Template" doc:id="158173b4-5c39-41a8-9dbf-c84490a5f00d" >
+					<content >&lt;html&gt;
+    &lt;head&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;h1&gt;This is report&lt;/h1&gt;
+        &lt;h3&gt;These items are on web shop, but not in database! Please delete them!&lt;/h3&gt;
+        &lt;table&gt;
+            &lt;th&gt;Code&lt;/th&gt;
+            &lt;th&gt;Name&lt;/th&gt;
+            &lt;th&gt;Quantity&lt;/th&gt;
+            &lt;th&gt;Description&lt;/th&gt;
+            &lt;tr&gt;
+                &lt;td&gt;#[payload.Code]&lt;/td&gt;
+                &lt;td&gt;#[payload.Name]&lt;/td&gt;
+                &lt;td&gt;#[payload.Quantity]&lt;/td&gt;
+                &lt;td&gt;#[payload.Description]&lt;/td&gt;
+            &lt;/tr&gt;
+        &lt;/table&gt;
+    &lt;/body&gt;
+&lt;/html&gt;</content>
+				</parse-template>
+				<email:send doc:name="Send" doc:id="68bcb91a-2840-4c84-a5bd-812ca699c274" config-ref="Email_SMTP" fromAddress="covid23serbia@gmail.com" subject="Shoe shop report">
+					<email:to-addresses >
+						<email:to-address value="covid23serbia@gmail.com" />
+					</email:to-addresses>
+					<email:body contentType="text/html" />
+				</email:send>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="2cdc7932-c055-4eb6-93e4-1658e6d14aea" message="All product are same" />
+			</otherwise>
+		</choice>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="ad41ca74-6882-4f13-ae58-56dbe82ad57e" type="FILE:ILLEGAL_PATH">
+				<logger level="INFO" doc:name="Logger" doc:id="facb30fb-cd4e-4adf-824b-984594a26dc1" message="Database error"/>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+</mule>

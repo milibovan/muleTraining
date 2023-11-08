@@ -1,0 +1,10 @@
+[
+    {"Code": 1,
+    "Name": "Key",
+    "Quantity": 3,
+    "Description": "Unlocking key"},
+    {"Code": 2,
+    "Name": "Cup",
+    "Quantity": 5,
+    "Description": "Cup for coffee"}
+]
